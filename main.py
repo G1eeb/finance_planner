@@ -1,17 +1,16 @@
 """Точка входа приложения Finance Planner."""
 
 from budget import calculate_budget, check_budget, format_report
-from transactions import (
+from models.transactions import (
     add_transaction,
     find_transactions_by_category,
     sort_transactions_by_amount,
     total_by_type,
     category_statistics,
 )
-from goals import (
+from models.goals import (
     add_goal,
     add_to_goal,
-    get_goal_progress,
     filter_achieved_goals,
     sort_goals_by_progress,
     total_saved,
@@ -28,41 +27,31 @@ GOALS_FILE = "data/goals.json"
 
 # ---------- Вывод данных ----------
 
-def show_transactions(transactions: list[dict]) -> None:
+def show_transactions(transactions: list) -> None:
     """Вывести список операций."""
     if not transactions:
         print("Операций пока нет.")
         return
-    print("-" * 78)
-    print(f"{'ID':<5}| {'Тип':<10}| {'Сумма':>12} | "
-          f"{'Категория':<20}| {'Дата':<12}")
-    print("-" * 78)
+    print("-" * 70)
     for t in transactions:
-        type_ru = "Доход" if t["type"] == "income" else "Расход"
-        print(f"{t['id']:<5}| {type_ru:<10}| {t['amount']:>12.2f} | "
-              f"{t['category']:<20}| {t['date']:<12}")
-    print("-" * 78)
+        print(t)
+    print("-" * 70)
 
 
-def show_goals(goals: list[dict]) -> None:
-    """Вывести список целей с прогрессом."""
+def show_goals(goals: list) -> None:
+    """Вывести список целей."""
     if not goals:
         print("Целей пока нет.")
         return
     print("-" * 70)
-    print(f"{'ID':<5}{'Название':<20}{'Цель':>12}{'Накоплено':>12}"
-          f"{'Прогресс':>12}")
-    print("-" * 70)
     for g in goals:
-        progress = get_goal_progress(g)
-        print(f"{g['id']:<5}{g['name']:<20}{g['target']:>12.2f}"
-              f"{g['saved']:>12.2f}{progress:>11.1f}%")
+        print(g)
     print("-" * 70)
 
 
 # ---------- Интерактивные операции ----------
 
-def add_transaction_interactive(transactions: list[dict]) -> None:
+def add_transaction_interactive(transactions: list) -> None:
     """Запросить данные и добавить операцию."""
     print("\nТип операции: 1 — доход, 2 — расход")
     choice = input_choice("Выбор: ", ["1", "2"])
@@ -75,24 +64,24 @@ def add_transaction_interactive(transactions: list[dict]) -> None:
     try:
         t = add_transaction(transactions, type_, amount,
                             category, d.isoformat())
-        print(f"Операция добавлена: id={t['id']}")
+        print(f"Операция добавлена: id={t.id}")
     except ValueError as e:
         print(f"Ошибка: {e}")
 
 
-def add_goal_interactive(goals: list[dict]) -> None:
+def add_goal_interactive(goals: list) -> None:
     """Запросить данные и добавить цель."""
     name = input("Название цели: ").strip()
     target = input_float("Целевая сумма: ")
 
     try:
         g = add_goal(goals, name, target)
-        print(f"Цель добавлена: id={g['id']}")
+        print(f"Цель добавлена: id={g.id}")
     except ValueError as e:
         print(f"Ошибка: {e}")
 
 
-def add_to_goal_interactive(goals: list[dict]) -> None:
+def add_to_goal_interactive(goals: list) -> None:
     """Пополнить существующую цель."""
     if not goals:
         print("Целей пока нет.")
@@ -104,20 +93,20 @@ def add_to_goal_interactive(goals: list[dict]) -> None:
 
     try:
         g = add_to_goal(goals, goal_id, amount)
-        print(f"Цель «{g['name']}»: накоплено {g['saved']:.2f} "
-              f"из {g['target']:.2f}")
+        print(f"Цель «{g.name}»: накоплено {g.saved:.2f} "
+              f"из {g.target:.2f}")
     except ValueError as e:
         print(f"Ошибка: {e}")
 
 
-def find_transactions_interactive(transactions: list[dict]) -> None:
+def find_transactions_interactive(transactions: list) -> None:
     """Найти операции по подстроке категории."""
     query = input("Подстрока категории: ").strip()
     found = find_transactions_by_category(transactions, query)
     show_transactions(found)
 
 
-def show_goals_sorted(goals: list[dict]) -> None:
+def show_goals_sorted(goals: list) -> None:
     """Показать цели, отсортированные по прогрессу."""
     if not goals:
         print("Целей пока нет.")
@@ -125,7 +114,7 @@ def show_goals_sorted(goals: list[dict]) -> None:
     show_goals(sort_goals_by_progress(goals))
 
 
-def show_total_saved(goals: list[dict]) -> None:
+def show_total_saved(goals: list) -> None:
     """Показать суммарную накопленную сумму по всем целям."""
     if not goals:
         print("Целей пока нет.")
@@ -134,7 +123,7 @@ def show_total_saved(goals: list[dict]) -> None:
     print(f"Всего накоплено по всем целям: {total:.2f} руб.")
 
 
-def show_achieved_goals(goals: list[dict]) -> None:
+def show_achieved_goals(goals: list) -> None:
     """Показать достигнутые цели."""
     achieved = list(filter_achieved_goals(goals))
     if not achieved:
@@ -142,12 +131,12 @@ def show_achieved_goals(goals: list[dict]) -> None:
         return
     print("\nДостигнутые цели:")
     for g in achieved:
-        print(f"  {g['name']} — {g['target']:.2f} руб.")
+        print(f"  {g.name} — {g.target:.2f} руб.")
 
 
 # ---------- Отчёты ----------
 
-def show_statistics(transactions: list[dict]) -> None:
+def show_statistics(transactions: list) -> None:
     """Показать статистику по операциям."""
     if not transactions:
         print("Операций пока нет.")
@@ -160,7 +149,10 @@ def show_statistics(transactions: list[dict]) -> None:
     print("\n" + "=" * 50)
     print(f"Доходы:      {income:>12.2f} руб.")
     print(f"Расходы:     {expense:>12.2f} руб.")
-    print(f"Баланс:      {balance:>12.2f} руб.")
+    if balance < 0:
+        print(f"Баланс:      {balance:>12.2f} руб.  (превышение расходов)")
+    else:
+        print(f"Баланс:      {balance:>12.2f} руб.")
     print("=" * 50)
 
     stats = category_statistics(transactions)
