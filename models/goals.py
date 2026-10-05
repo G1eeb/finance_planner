@@ -69,3 +69,50 @@ class Goal:
             "target": self.target,
             "saved": self.saved,
         }
+
+
+# ---------- Функции работы с коллекцией целей ----------
+
+def add_goal(goals: list[Goal], name: str, target: float) -> Goal:
+    """Создать цель, добавить её в коллекцию и вернуть."""
+    goal_id = max((g.id for g in goals), default=0) + 1
+    goal = Goal(goal_id, name, target)
+    goals.append(goal)
+    return goal
+
+
+def find_goal_by_id(goals: list[Goal], goal_id: int) -> Goal | None:
+    """Найти цель по идентификатору. Вернуть None, если не найдена."""
+    for goal in goals:
+        if goal.id == goal_id:
+            return goal
+    return None
+
+
+def add_to_goal(goals: list[Goal], goal_id: int, amount: float) -> Goal:
+    """Пополнить цель по идентификатору.
+
+    Возвращает обновлённую цель.
+    Вызывает ValueError, если цель не найдена.
+    """
+    goal = find_goal_by_id(goals, goal_id)
+    if goal is None:
+        raise ValueError(f"Цель с id={goal_id} не найдена.")
+
+    goal.add_to_goal(amount)
+    return goal
+
+
+def filter_achieved_goals(goals: list[Goal]):
+    """Вернуть генератор достигнутых целей."""
+    return (g for g in goals if g.is_achieved())
+
+
+def sort_goals_by_progress(goals: list[Goal]) -> list[Goal]:
+    """Отсортировать цели по проценту выполнения по убыванию."""
+    return sorted(goals, key=Goal.get_progress, reverse=True)
+
+
+def total_saved(goals: list[Goal]) -> float:
+    """Подсчитать суммарно накопленную сумму по всем целям."""
+    return sum(g.saved for g in goals)
