@@ -25,21 +25,16 @@ def check_budget(planned_expense: float, remaining_budget: float,
     return status, warning
 
 
-def format_report(user_name: str, expense_date: str, expense_category: str,
-                  monthly_budget: float, current_expenses: float,
+def format_report(monthly_budget: float, current_expenses: float,
                   remaining_budget: float, planned_expense: float,
                   status: str, warning: str) -> str:
     """Сформировать текст отчёта о бюджете."""
     lines = [
         "=" * 50,
-        f"Пользователь: {user_name}",
-        f"Дата операции: {expense_date}",
-        f"Категория: {expense_category}",
-        "-" * 50,
-        f"Месячный бюджет:      {monthly_budget:>10.2f} руб.",
-        f"Текущие расходы:      {current_expenses:>10.2f} руб.",
-        f"Остаток бюджета:      {remaining_budget:>10.2f} руб.",
-        f"Планируемая трата:    {planned_expense:>10.2f} руб.",
+        f"Месячный бюджет:      {monthly_budget:>12.2f} руб.",
+        f"Текущие расходы:      {current_expenses:>12.2f} руб.",
+        f"Остаток бюджета:      {remaining_budget:>12.2f} руб.",
+        f"Планируемая трата:    {planned_expense:>12.2f} руб.",
         "-" * 50,
         f"Статус: {status}",
         f"Примечание: {warning}",
