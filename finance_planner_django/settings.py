@@ -38,8 +38,9 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "homepage",
-    "transactions",
-    "goals",
+    "incomes",
+    "expenses",
+    "budgets",
 ]
 
 MIDDLEWARE = [
