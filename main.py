@@ -1,161 +1,134 @@
-"""Точка входа приложения Finance Planner."""
+"""Точка входа консольного приложения Finance Planner."""
 
-from budget import calculate_budget, check_budget, format_report
-from models.transactions import (
-    add_transaction,
-    find_transactions_by_category,
-    sort_transactions_by_amount,
-    total_by_type,
-    category_statistics,
+from models.incomes import (
+    add_income,
+    find_incomes_by_category,
+    sort_incomes_by_amount,
+    total_incomes,
 )
-from models.goals import (
-    add_goal,
-    add_to_goal,
-    filter_achieved_goals,
-    sort_goals_by_progress,
-    total_saved,
+from models.expenses import (
+    add_expense,
+    expenses_by_category,
+    find_expenses_by_category,
+    sort_expenses_by_amount,
+    total_expenses,
+)
+from models.budgets import (
+    add_budget,
+    find_budget_by_id,
 )
 from storage import (
-    load_transactions, save_transactions,
-    load_goals, save_goals,
+    load_budgets, save_budgets,
+    load_expenses, save_expenses,
+    load_incomes, save_incomes,
 )
 from utils import input_int, input_float, input_date, input_choice
 
-TRANSACTIONS_FILE = "data/transactions.json"
-GOALS_FILE = "data/goals.json"
+INCOMES_FILE = "data/incomes.json"
+EXPENSES_FILE = "data/expenses.json"
+BUDGETS_FILE = "data/budgets.json"
 
 
-# ---------- Вывод данных ----------
+# ---------- Вывод ----------
 
-def show_transactions(transactions: list) -> None:
-    """Вывести список операций."""
-    if not transactions:
-        print("Операций пока нет.")
+def show_incomes(incomes: list) -> None:
+    """Вывести список доходов."""
+    if not incomes:
+        print("Доходов пока нет.")
         return
-    print("-" * 70)
-    for t in transactions:
-        print(t)
-    print("-" * 70)
+    print("-" * 60)
+    for i in incomes:
+        print(i)
+    print("-" * 60)
 
 
-def show_goals(goals: list) -> None:
-    """Вывести список целей."""
-    if not goals:
-        print("Целей пока нет.")
+def show_expenses(expenses: list) -> None:
+    """Вывести список расходов."""
+    if not expenses:
+        print("Расходов пока нет.")
         return
-    print("-" * 70)
-    for g in goals:
-        print(g)
-    print("-" * 70)
+    print("-" * 60)
+    for e in expenses:
+        print(e)
+    print("-" * 60)
+
+
+def show_budgets(budgets: list) -> None:
+    """Вывести список бюджетов."""
+    if not budgets:
+        print("Бюджетов пока нет.")
+        return
+    print("-" * 60)
+    for b in budgets:
+        print(b)
+    print("-" * 60)
 
 
 # ---------- Интерактивные операции ----------
 
-def add_transaction_interactive(transactions: list) -> None:
-    """Запросить данные и добавить операцию."""
-    print("\nТип операции: 1 — доход, 2 — расход")
-    choice = input_choice("Выбор: ", ["1", "2"])
-    type_ = "income" if choice == "1" else "expense"
-
-    amount = input_float("Сумма: ")
+def add_income_interactive(incomes: list) -> None:
+    """Добавить доход."""
+    amount = input_float("Сумма дохода: ")
     category = input("Категория: ").strip()
     d = input_date("Дата (ДД.ММ.ГГГГ): ")
-
     try:
-        t = add_transaction(transactions, type_, amount,
-                            category, d.isoformat())
-        print(f"Операция добавлена: id={t.id}")
+        i = add_income(incomes, amount, category, d.isoformat())
+        print(f"Доход добавлен: id={i.id}")
     except ValueError as e:
         print(f"Ошибка: {e}")
 
 
-def add_goal_interactive(goals: list) -> None:
-    """Запросить данные и добавить цель."""
-    name = input("Название цели: ").strip()
-    target = input_float("Целевая сумма: ")
-
+def add_expense_interactive(expenses: list) -> None:
+    """Добавить расход."""
+    amount = input_float("Сумма расхода: ")
+    category = input("Категория: ").strip()
+    d = input_date("Дата (ДД.ММ.ГГГГ): ")
     try:
-        g = add_goal(goals, name, target)
-        print(f"Цель добавлена: id={g.id}")
+        e = add_expense(expenses, amount, category, d.isoformat())
+        print(f"Расход добавлен: id={e.id}")
+    except ValueError as err:
+        print(f"Ошибка: {err}")
+
+
+def add_budget_interactive(budgets: list) -> None:
+    """Добавить бюджет."""
+    month = input("Месяц (ГГГГ-ММ): ").strip()
+    amount = input_float("Сумма бюджета: ")
+    try:
+        b = add_budget(budgets, month, amount)
+        print(f"Бюджет добавлен: id={b.id}")
     except ValueError as e:
         print(f"Ошибка: {e}")
 
 
-def add_to_goal_interactive(goals: list) -> None:
-    """Пополнить существующую цель."""
-    if not goals:
-        print("Целей пока нет.")
-        return
-
-    show_goals(goals)
-    goal_id = input_int("ID цели для пополнения: ")
-    amount = input_float("Сумма пополнения: ")
-
-    try:
-        g = add_to_goal(goals, goal_id, amount)
-        print(f"Цель «{g.name}»: накоплено {g.saved:.2f} "
-              f"из {g.target:.2f}")
-    except ValueError as e:
-        print(f"Ошибка: {e}")
-
-
-def find_transactions_interactive(transactions: list) -> None:
-    """Найти операции по подстроке категории."""
+def find_incomes_interactive(incomes: list) -> None:
+    """Найти доходы по категории."""
     query = input("Подстрока категории: ").strip()
-    found = find_transactions_by_category(transactions, query)
-    show_transactions(found)
+    show_incomes(find_incomes_by_category(incomes, query))
 
 
-def show_goals_sorted(goals: list) -> None:
-    """Показать цели, отсортированные по прогрессу."""
-    if not goals:
-        print("Целей пока нет.")
-        return
-    show_goals(sort_goals_by_progress(goals))
+def find_expenses_interactive(expenses: list) -> None:
+    """Найти расходы по категории."""
+    query = input("Подстрока категории: ").strip()
+    show_expenses(find_expenses_by_category(expenses, query))
 
 
-def show_total_saved(goals: list) -> None:
-    """Показать суммарную накопленную сумму по всем целям."""
-    if not goals:
-        print("Целей пока нет.")
-        return
-    total = total_saved(goals)
-    print(f"Всего накоплено по всем целям: {total:.2f} руб.")
-
-
-def show_achieved_goals(goals: list) -> None:
-    """Показать достигнутые цели."""
-    achieved = list(filter_achieved_goals(goals))
-    if not achieved:
-        print("Достигнутых целей пока нет.")
-        return
-    print("\nДостигнутые цели:")
-    for g in achieved:
-        print(f"  {g.name} — {g.target:.2f} руб.")
-
-
-# ---------- Отчёты ----------
-
-def show_statistics(transactions: list) -> None:
-    """Показать статистику по операциям."""
-    if not transactions:
-        print("Операций пока нет.")
-        return
-
-    income = total_by_type(transactions, "income")
-    expense = total_by_type(transactions, "expense")
-    balance = income - expense
+def show_statistics(incomes: list, expenses: list) -> None:
+    """Показать статистику по доходам и расходам."""
+    total_inc = total_incomes(incomes)
+    total_exp = total_expenses(expenses)
+    balance = total_inc - total_exp
 
     print("\n" + "=" * 50)
-    print(f"Доходы:      {income:>12.2f} руб.")
-    print(f"Расходы:     {expense:>12.2f} руб.")
+    print(f"Доходы:   {total_inc:>12.2f} руб.")
+    print(f"Расходы:  {total_exp:>12.2f} руб.")
     if balance < 0:
-        print(f"Баланс:      {balance:>12.2f} руб.  (превышение расходов)")
+        print(f"Баланс:   {balance:>12.2f} руб.  (превышение расходов)")
     else:
-        print(f"Баланс:      {balance:>12.2f} руб.")
+        print(f"Баланс:   {balance:>12.2f} руб.")
     print("=" * 50)
 
-    stats = category_statistics(transactions)
+    stats = expenses_by_category(expenses)
     if stats:
         print("Расходы по категориям:")
         for category, total in sorted(
@@ -164,65 +137,67 @@ def show_statistics(transactions: list) -> None:
             print(f"  {category:<25}{total:>12.2f} руб.")
 
 
-def check_budget_interactive() -> None:
-    """Проверить возможность планируемой траты (сценарий ПР1)."""
-    print("\n--- Проверка бюджета ---")
-    monthly_budget = input_float("Месячный бюджет: ")
-    current_expenses = input_float("Текущие расходы: ")
-    planned_expense = input_float("Планируемая трата: ")
-
-    remaining, after = calculate_budget(
-        monthly_budget, current_expenses, planned_expense
-    )
-    status, warning = check_budget(planned_expense, remaining, after)
-
-    report = format_report(
-        monthly_budget, current_expenses, remaining,
-        planned_expense, status, warning,
-    )
-    print(report)
+def check_budget_interactive(budgets: list) -> None:
+    """Проверить бюджет: возможна ли планируемая трата."""
+    if not budgets:
+        print("Сначала добавьте бюджет.")
+        return
+    show_budgets(budgets)
+    budget_id = input_int("ID бюджета: ")
+    budget = find_budget_by_id(budgets, budget_id)
+    if budget is None:
+        print("Бюджет не найден.")
+        return
+    amount = input_float("Планируемая трата: ")
+    if budget.can_afford(amount):
+        remaining = budget.get_remaining_after(amount)
+        print(f"Трата возможна. Остаток после: {remaining:.2f} руб.")
+        if remaining < 5000:
+            print("Внимание: останется менее 5000 руб.")
+    else:
+        overspend = amount - budget.get_remaining()
+        print(f"Трата невозможна. Превышение на {overspend:.2f} руб.")
 
 
 # ---------- Меню ----------
 
 MENU = """
 ===== Finance Planner =====
-1. Показать операции
-2. Добавить операцию
-3. Найти операции по категории
-4. Сортировать операции по сумме
-5. Статистика по операциям
-6. Показать цели
-7. Показать цели по прогрессу
-8. Показать суммарные накопления
-9. Добавить цель
-10. Пополнить цель
-11. Достигнутые цели
-12. Проверить бюджет (планирование)
+1. Показать доходы
+2. Добавить доход
+3. Найти доходы по категории
+4. Сортировать доходы по сумме
+5. Показать расходы
+6. Добавить расход
+7. Найти расходы по категории
+8. Сортировать расходы по сумме
+9. Показать бюджеты
+10. Добавить бюджет
+11. Проверить бюджет
+12. Статистика
 0. Выход
 """
 
 
 def main() -> None:
-    """Запустить приложение: загрузить данные, показать меню, обработать."""
-    transactions = load_transactions(TRANSACTIONS_FILE)
-    goals = load_goals(GOALS_FILE)
+    """Запустить консольное приложение."""
+    incomes = load_incomes(INCOMES_FILE)
+    expenses = load_expenses(EXPENSES_FILE)
+    budgets = load_budgets(BUDGETS_FILE)
 
     actions = {
-        "1": lambda: show_transactions(transactions),
-        "2": lambda: add_transaction_interactive(transactions),
-        "3": lambda: find_transactions_interactive(transactions),
-        "4": lambda: show_transactions(
-            sort_transactions_by_amount(transactions)
-        ),
-        "5": lambda: show_statistics(transactions),
-        "6": lambda: show_goals(goals),
-        "7": lambda: show_goals_sorted(goals),
-        "8": lambda: show_total_saved(goals),
-        "9": lambda: add_goal_interactive(goals),
-        "10": lambda: add_to_goal_interactive(goals),
-        "11": lambda: show_achieved_goals(goals),
-        "12": check_budget_interactive,
+        "1": lambda: show_incomes(incomes),
+        "2": lambda: add_income_interactive(incomes),
+        "3": lambda: find_incomes_interactive(incomes),
+        "4": lambda: show_incomes(sort_incomes_by_amount(incomes)),
+        "5": lambda: show_expenses(expenses),
+        "6": lambda: add_expense_interactive(expenses),
+        "7": lambda: find_expenses_interactive(expenses),
+        "8": lambda: show_expenses(sort_expenses_by_amount(expenses)),
+        "9": lambda: show_budgets(budgets),
+        "10": lambda: add_budget_interactive(budgets),
+        "11": lambda: check_budget_interactive(budgets),
+        "12": lambda: show_statistics(incomes, expenses),
     }
 
     while True:
@@ -235,8 +210,9 @@ def main() -> None:
             break
         actions[choice]()
 
-    save_transactions(TRANSACTIONS_FILE, transactions)
-    save_goals(GOALS_FILE, goals)
+    save_incomes(INCOMES_FILE, incomes)
+    save_expenses(EXPENSES_FILE, expenses)
+    save_budgets(BUDGETS_FILE, budgets)
     print("Данные сохранены. До свидания!")
 
 

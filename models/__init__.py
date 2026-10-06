@@ -1,6 +1,7 @@
 """Пакет классов предметной области Finance Planner."""
 
-from .transactions import Transaction
-from .goals import Goal
+from .budgets import Budget
+from .expenses import Expense
+from .incomes import Income
 
-__all__ = ["Transaction", "Goal"]
+__all__ = ["Budget", "Expense", "Income"]
