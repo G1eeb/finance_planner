@@ -1,3 +1,8 @@
-"""View-функции приложения <имя>."""
+"""View-функции приложения homepage."""
 
-# Create your views here.
+from django.http import HttpResponse
+
+
+def index(request):
+    """Главная страница приложения."""
+    return HttpResponse("Finance Planner — сервис финансового планирования")
