@@ -1,212 +1,385 @@
 # Finance Planner — сервис финансового планирования
 
-Приложение для учёта личных доходов, расходов и контроля месячного бюджета.
+Приложение для учёта личных доходов и расходов, контроля месячного бюджета
+и отслеживания финансовых целей.
 
-На ПР5 проект получил **веб-интерфейс на Django**. Консольная версия сохранена
-и продолжает работать параллельно.
+**Веб-интерфейс реализован на Django с использованием системы шаблонов
+Django Template Language (DTL).**
 
-## Предметная область
+## 1. Назначение проекта
 
-Основные сущности:
+Finance Planner — учебное приложение для управления доходами, расходами
+и месячными бюджетами. Проект развивается поэтапно:
 
-- **Income** — доход (поступление денежных средств);
-- **Expense** — расход (списание денежных средств);
-- **Budget** — месячный бюджет.
+- ПР1–ПР3 — предметная область на Python (классы, JSON-хранилище);
+- ПР5 — веб-интерфейс на Django (HTML формировался в Python);
+- ПР6 — переход на **систему шаблонов Django**.
 
-## Используемый фреймворк
+## 2. Используемые технологии
 
-- **Django 5.2** — веб-фреймворк;
-- **Bootstrap 5.3** — CSS-фреймворк для вёрстки (подключён через CDN).
+- **Python 3**;
+- **Django 5**;
+- **Django Template Language (DTL)**;
+- **HTML5**, **CSS3**, **JavaScript**;
+- **Bootstrap 5** (CDN);
+- **JSON** — источник данных;
+- **Git**;
+- **pytest**, **flake8**.
 
-## Классы предметной области (из ПР3)
+## 3. Предметная область
 
-### `Income` — доход
+Три основные сущности:
 
-Атрибуты: `id`, `amount`, `category`, `date`.
+- **Income** — доход (`id`, `amount`, `category`, `date`);
+- **Expense** — расход (`id`, `amount`, `category`, `date`);
+- **Budget** — месячный бюджет (`id`, `month`, `monthly_budget`,
+  `current_expenses`).
 
-Методы: `validate_amount()`, `from_dict()`, `to_dict()`, `__str__()`.
+Для предметной области реализованы собственные Python-классы в пакете `models/`.
 
-### `Expense` — расход
+**На текущем этапе данные хранятся в JSON-файлах. Django ORM
+и база данных приложения пока не используются.**
 
-Атрибуты: `id`, `amount`, `category`, `date`.
+## 4. Структура проекта
+# Finance Planner — сервис финансового планирования
 
-Методы: `validate_amount()`, `from_dict()`, `to_dict()`, `__str__()`.
+Приложение для учёта личных доходов и расходов, контроля месячного бюджета
+и отслеживания финансовых целей.
 
-### `Budget` — месячный бюджет
+**Веб-интерфейс реализован на Django с использованием системы шаблонов
+Django Template Language (DTL).**
 
-Атрибуты: `id`, `month`, `monthly_budget`, `current_expenses`.
+## 1. Назначение проекта
 
-Методы: `get_remaining()`, `get_remaining_after()`, `can_afford()`,
-`validate_budget()`, `from_dict()`, `to_dict()`, `__str__()`.
+Finance Planner — учебное приложение для управления доходами, расходами
+и месячными бюджетами. Проект развивается поэтапно:
 
-Классы размещены в пакете `models/` и используются **и веб-версией,
-и консольной**.
+- ПР1–ПР3 — предметная область на Python (классы, JSON-хранилище);
+- ПР5 — веб-интерфейс на Django (HTML формировался в Python);
+- ПР6 — переход на **систему шаблонов Django**.
 
-## Страницы веб-интерфейса
+## 2. Используемые технологии
 
-| URL | View-функция | Назначение |
+- **Python 3**;
+- **Django 5**;
+- **Django Template Language (DTL)**;
+- **HTML5**, **CSS3**, **JavaScript**;
+- **Bootstrap 5** (CDN);
+- **JSON** — источник данных;
+- **Git**;
+- **pytest**, **flake8**.
+
+## 3. Предметная область
+
+Три основные сущности:
+
+- **Income** — доход (`id`, `amount`, `category`, `date`);
+- **Expense** — расход (`id`, `amount`, `category`, `date`);
+- **Budget** — месячный бюджет (`id`, `month`, `monthly_budget`,
+  `current_expenses`).
+
+Для предметной области реализованы собственные Python-классы в пакете `models/`.
+
+**На текущем этапе данные хранятся в JSON-файлах. Django ORM
+и база данных приложения пока не используются.**
+
+## 4. Структура проекта
+
+```
+finance_planner/
+├── manage.py
+├── requirements.txt
+├── README.md
+├── .flake8
+├── .gitignore
+├── finance_planner_django/         — пакет настроек Django
+│   ├── __init__.py
+│   ├── settings.py
+│   ├── urls.py
+│   ├── asgi.py
+│   └── wsgi.py
+├── templates/                      — шаблоны уровня проекта
+│   ├── base.html
+│   ├── 404.html
+│   └── includes/
+│       └── navigation.html
+├── homepage/                       — Django-приложение (главная, 404)
+│   ├── templates/homepage/index.html
+│   ├── static/homepage/
+│   │   ├── css/style.css
+│   │   ├── js/main.js
+│   │   └── img/logo.svg
+│   ├── views.py
+│   └── urls.py
+├── incomes/                        — Django-приложение (доходы)
+│   ├── templates/incomes/
+│   │   ├── income_list.html
+│   │   ├── income_detail.html
+│   │   └── includes/income_card.html
+│   ├── views.py
+│   └── urls.py
+├── expenses/                       — Django-приложение (расходы)
+│   ├── templates/expenses/
+│   │   ├── expense_list.html
+│   │   ├── expense_detail.html
+│   │   └── includes/expense_card.html
+│   ├── views.py
+│   └── urls.py
+├── budgets/                        — Django-приложение (бюджеты)
+│   ├── templates/budgets/
+│   │   ├── budget_list.html
+│   │   ├── budget_detail.html
+│   │   └── includes/budget_status.html
+│   ├── views.py
+│   └── urls.py
+├── models/                         — классы предметной области (ПР3)
+│   ├── __init__.py
+│   ├── incomes.py
+│   ├── expenses.py
+│   └── budgets.py
+├── data/                           — JSON-файлы данных
+│   ├── incomes.json
+│   ├── expenses.json
+│   └── budgets.json
+├── tests/                          — тесты pytest
+│   ├── test_incomes.py
+│   ├── test_expenses.py
+│   └── test_budgets.py
+├── main.py                         — консольная версия (ПР3)
+├── storage.py                      — JSON ↔ объекты
+├── utils.py                        — безопасный ввод
+└── conftest.py
+```
+
+## 5. Веб-интерфейс
+
+Основные страницы:
+
+| URL | View-функция | Что показывает |
 |---|---|---|
-| `/` | `homepage.views.index` | Главная страница с навигацией |
+| `/` | `homepage.views.index` | Главная с навигацией |
 | `/incomes/` | `incomes.views.incomes` | Список доходов |
 | `/incomes/<int:income_id>/` | `incomes.views.income_detail` | Карточка дохода |
 | `/expenses/` | `expenses.views.expenses` | Список расходов |
 | `/expenses/<int:expense_id>/` | `expenses.views.expense_detail` | Карточка расхода |
 | `/budgets/` | `budgets.views.budgets` | Список бюджетов |
-| `/budgets/<int:budget_id>/` | `budgets.views.budget_detail` | Карточка бюджета + калькулятор |
-| `/admin/` | `django.contrib.admin` | Админ-панель Django |
+| `/budgets/<int:budget_id>/` | `budgets.views.budget_detail` | Карточка бюджета + калькулятор (`?planned=X`) |
 
-**Обработка ошибок:**
-- при несуществующем ID — страница с сообщением, код 404;
-- для несуществующих URL — кастомная страница 404
-  (`homepage.views.page_not_found`).
+**HTML формируется шаблонами.** Генерация HTML в Python-коде **не используется**.
+Функция `page()` удалена полностью.
 
-**Разовый калькулятор бюджета** доступен на странице бюджета
-через GET-параметр: `/budgets/1/?planned=15000`.
+## 6. Django Template Language
 
-## Как устроена навигация
+### 6.1. Базовый шаблон
 
-Все страницы используют общий каркас — функция `page()`
-в `homepage/views.py`. Она собирает HTML-документ:
-- кодировка UTF-8, viewport;
-- заголовок вкладки;
-- подключение Bootstrap 5.3 через CDN;
-- верхняя навигация (главная, доходы, расходы, бюджеты).
+Общий шаблон: `templates/base.html`. Содержит:
 
-Каждая view-функция формирует только **содержимое** страницы
-и передаёт его в `page()`.
+- общую HTML-структуру;
+- подключение Bootstrap и **собственного CSS**;
+- логотип через `{% static %}`;
+- навигацию через `{% include %}`;
+- подвал с годом (выводится через JavaScript);
+- блоки `{% block title %}` и `{% block content %}`.
 
-## Данные
+Дочерние шаблоны используют наследование:
 
-Данные хранятся в JSON-файлах:
-- `data/incomes.json` — доходы;
-- `data/expenses.json` — расходы;
-- `data/budgets.json` — бюджеты.
+```django
+{% extends "base.html" %}
+```
 
-При загрузке JSON → объекты `Income`, `Expense`, `Budget`
-(через `from_dict`). При сохранении объекты → JSON (через `to_dict`).
+Заголовок и содержимое переопределяются:
 
-**Загрузка и сохранение выполняются функциями модуля `storage.py`**:
-- `load_incomes()` / `save_incomes()`;
-- `load_expenses()` / `save_expenses()`;
-- `load_budgets()` / `save_budgets()`.
+```django
+{% block title %}…{% endblock %}
+{% block content %}…{% endblock %}
+```
 
-**На ПР5 Django ORM и база данных не используются** — источник данных
-остаётся JSON. Перенос сущностей в Django ORM — на следующих работах.
+### 6.2. Включаемые шаблоны
 
-## Структура проекта
+Повторяющиеся фрагменты вынесены в отдельные файлы:
 
-    finance_planner/
-    ├── manage.py                       — точка входа Django
-    ├── finance_planner_django/         — пакет настроек Django
-    │   ├── __init__.py
-    │   ├── settings.py
-    │   ├── urls.py                     — корневая маршрутизация + handler404
-    │   ├── asgi.py
-    │   └── wsgi.py
-    ├── homepage/                       — Django-приложение
-    │   ├── migrations/
-    │   ├── __init__.py
-    │   ├── admin.py
-    │   ├── apps.py
-    │   ├── models.py                   — пусто (ORM позже)
-    │   ├── tests.py
-    │   ├── urls.py
-    │   └── views.py                    — page(), index(), page_not_found()
-    ├── incomes/                        — Django-приложение (доходы)
-    │   ├── migrations/
-    │   ├── __init__.py
-    │   ├── admin.py
-    │   ├── apps.py
-    │   ├── models.py                   — пусто
-    │   ├── tests.py
-    │   ├── urls.py
-    │   └── views.py                    — incomes(), income_detail()
-    ├── expenses/                       — Django-приложение (расходы)
-    │   ├── ... (аналогично)
-    │   ├── urls.py
-    │   └── views.py                    — expenses(), expense_detail()
-    ├── budgets/                        — Django-приложение (бюджеты)
-    │   ├── ... (аналогично)
-    │   ├── urls.py
-    │   └── views.py                    — budgets(), budget_detail()
-    ├── models/                         — пакет классов предметной области
-    │   ├── __init__.py
-    │   ├── incomes.py                  — класс Income + функции
-    │   ├── expenses.py                 — класс Expense + функции
-    │   └── budgets.py                  — класс Budget + функции
-    ├── data/                           — JSON-файлы данных
-    │   ├── .gitkeep
-    │   ├── incomes.json
-    │   ├── expenses.json
-    │   └── budgets.json
-    ├── tests/                          — автоматизированные тесты pytest
-    │   ├── test_incomes.py
-    │   ├── test_expenses.py
-    │   └── test_budgets.py
-    ├── main.py                         — консольная версия
-    ├── storage.py                      — JSON ↔ объекты
-    ├── utils.py                        — безопасный ввод
-    ├── conftest.py
-    ├── requirements.txt                — Django, pytest, flake8
-    ├── .flake8
-    ├── .gitignore
-    └── README.md
+- `includes/navigation.html` — навигация;
+- `incomes/includes/income_card.html` — карточка дохода;
+- `expenses/includes/expense_card.html` — карточка расхода;
+- `budgets/includes/budget_status.html` — статус бюджета.
 
-## Запуск
+Подключение:
 
-### Веб-версия (Django)
+```django
+{% include "incomes/includes/income_card.html" %}
+```
 
-    python manage.py check  # проверка конфигурации проекта
-    python manage.py migrate    # применение миграций Django (создание служебных таблиц)
-    python manage.py runserver  # запуск сервера
+### 6.3. Контекст
 
-Открыть в браузере: `http://127.0.0.1:8000/`
+View-функции передают данные в шаблоны через словарь:
 
-### Консольная версия
+```python
+context = {"incomes": incomes_list}
+return render(request, "incomes/income_list.html", context)
+```
 
-    python main.py
+В шаблоне данные доступны по имени:
 
-## Тестирование
+```django
+{% for income in incomes %}
+```
 
-    pytest -v
+### 6.4. Циклы и условия
 
-Автоматизированные тесты продолжают проходить — функциональность
-консольной версии сохранена.
+```django
+{% for income in incomes %}
+    …
+{% empty %}
+    <p>Доходов пока нет.</p>
+{% endfor %}
+```
 
-## Проверка качества кода
+Условия — для статуса бюджета и обработки 404:
 
-    flake8 .
+```django
+{% if budget.is_achieved %}
+    Достигнут
+{% else %}
+    В процессе
+{% endif %}
+```
 
-## Зависимости
+### 6.5. Фильтры шаблонов
 
-Состав `requirements.txt`:
+- `{{ incomes|length }}` — количество элементов;
+- `{{ income.category|default:"Без категории" }}` — значение по умолчанию;
+- `{{ income.amount|floatformat:2 }}` — число с 2 знаками.
 
-- `Django==5.2.*` — веб-фреймворк;
-- `pytest>=8.0` — тесты;
-- `flake8>=7.0` — проверка качества кода.
+Фильтры используются **только для представления**, не для бизнес-логики.
 
-Установка:
+## 7. Именованные URL и пространства имён
 
-    pip install -r requirements.txt
+В каждом `urls.py` объявлено:
 
-## Текущее состояние
+```python
+app_name = "incomes"
+```
 
-**Реализовано на ПР5:**
-- Django-проект и четыре Django-приложения
-  (`homepage`, `incomes`, `expenses`, `budgets`);
-- двухуровневая маршрутизация URL;
-- view-функции для всех страниц;
-- общий HTML-каркас страницы через функцию `page()`;
-- страницы: главная, списки и карточки доходов, расходов, бюджетов;
-- отображение данных предметной области из JSON;
-- навигация между страницами;
-- оформление Bootstrap 5.3;
-- кастомная страница 404;
-- разовый калькулятор бюджета через GET-параметры.
+Имена маршрутов: `list`, `detail`. Ссылки в шаблонах:
 
-**Планируется (следующие ПР):**
-- перенос сущностей `Income`, `Expense`, `Budget` в Django ORM;
-- подключение базы данных;
-- переход на Django-шаблоны (`templates/`, `render()`, `base.html`);
-- формы создания и редактирования (POST-запросы);
+```django
+{% url 'incomes:list' %}
+{% url 'incomes:detail' income.id %}
+```
+
+Пространства имён: `homepage`, `incomes`, `expenses`, `budgets`.
+
+## 8. Статические файлы
+
+Каталог: `homepage/static/homepage/`.
+
+| Ресурс | Путь | Где используется |
+|---|---|---|
+| CSS | `css/style.css` | `base.html`, карточки, статус |
+| JS | `js/main.js` | `base.html` (год в подвале) |
+| Логотип | `img/logo.svg` | `base.html` |
+
+Подключение через:
+
+```django
+{% load static %}
+{% static 'homepage/css/style.css' %}
+```
+
+Собственный CSS оформляет карточки доходов, расходов, бюджетов
+и бейджи статусов. JavaScript выводит текущий год в подвал.
+
+## 9. Хранение данных
+
+На текущем этапе данные хранятся в JSON-файлах:
+
+- `data/incomes.json`;
+- `data/expenses.json`;
+- `data/budgets.json`.
+
+Загрузка — через `storage.py`. Классы предметной области — в `models/`.
+
+**Django ORM и база данных пока не используются** — это задача следующих ПР.
+
+## 10. Основные модули
+
+- **`storage.py`** — загрузка данных из JSON;
+- **`models/`** — классы `Income`, `Expense`, `Budget`;
+- **`main.py`** — консольная версия приложения (сохранена с ПР3);
+- **`utils.py`** — вспомогательные функции ввода;
+- **`incomes/views.py`, `expenses/views.py`, `budgets/views.py`,
+  `homepage/views.py`** — view-функции на `render()`.
+
+## 11. Тестирование
+
+Тесты в каталоге `tests/`:
+
+- `test_incomes.py`;
+- `test_expenses.py`;
+- `test_budgets.py`.
+
+Запуск:
+
+```bash
+pytest -v
+```
+
+## 12. Проверка качества кода
+
+```bash
+flake8 . --extend-exclude=venv
+```
+
+## 13. Запуск проекта
+
+```bash
+python manage.py runserver
+```
+
+Веб-интерфейс: `http://127.0.0.1:8000/`.
+
+## 14. Git
+
+Каждый этап фиксируется отдельным коммитом с префиксом практической работы:
+
+```bash
+git add .
+git commit -m "PR6: …"
+```
+
+## 15. Текущее состояние проекта
+
+Реализовано:
+
+- классы предметной области `Income`, `Expense`, `Budget` (ПР3);
+- консольный интерфейс;
+- JSON-хранилище;
+- Django-проект и четыре Django-приложения;
+- веб-представления для основных сущностей;
+- **Django Template Language**;
+- наследование шаблонов;
+- базовый шаблон `base.html`;
+- блоки `block`;
+- включаемые шаблоны `include`;
+- передача данных через контекст;
+- циклы и условия;
+- фильтры шаблонов;
+- именованные URL и пространства имён;
+- статические файлы (CSS, JS, логотип);
+- собственное оформление интерфейса;
+- тесты предметной области.
+
+**Не реализовано (на следующих ПР):**
+
+- Django ORM и модели Django;
+- формы Django;
+- работа с базой данных;
+- операции создания/редактирования/удаления через веб-формы;
 - аутентификация пользователей.
+
+## 16. Дальнейшее развитие
+
+- переход от JSON к базе данных и Django ORM;
+- формы Django для создания и редактирования;
+- валидация пользовательского ввода;
+- API.
