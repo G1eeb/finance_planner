@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}
+Бюджеты — Finance Planner
+{% endblock %}
+
+{% block content %}
+<h1>Бюджеты</h1>
+
+<p>Всего бюджетов: {{ budgets|length }}</p>
+
+<div class="budgets-list">
+    {% for budget in budgets %}
+    <article class="card budget-card mb-3">
+        <div class="card-body">
+            <h2 class="card-title">{{ budget.month }}</h2>
+            <p class="card-text">
+                <strong>Бюджет:</strong>
+                {{ budget.monthly_budget|floatformat:2 }} руб.
+            </p>
+            <p class="card-text">
+                <strong>Потрачено:</strong>
+                {{ budget.current_expenses|floatformat:2 }} руб.
+            </p>
+            <p class="card-text">
+                <strong>Остаток:</strong>
+                {{ budget.get_remaining|floatformat:2 }} руб.
+            </p>
+            <p class="card-text">
+                Статус:
+                {% include "budgets/includes/budget_status.html" %}
+            </p>
+            <a href="{% url 'budgets:detail' budget.id %}"
+               class="btn btn-primary">
+                Подробнее
+            </a>
+        </div>
+    </article>
+    {% empty %}
+    <div class="alert alert-info">
+        Бюджетов пока нет.
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

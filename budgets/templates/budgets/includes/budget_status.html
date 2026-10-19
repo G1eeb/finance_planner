@@ -1,0 +1,9 @@
+{% if budget.is_achieved %}
+<span class="badge bg-success budget-status budget-status-achieved">
+    Достигнут
+</span>
+{% else %}
+<span class="badge bg-primary budget-status budget-status-active">
+    В процессе
+</span>
+{% endif %}
