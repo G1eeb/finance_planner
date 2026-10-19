@@ -1,0 +1,17 @@
+<article class="card income-card mb-3">
+    <div class="card-body">
+        <h2 class="card-title">
+            {{ income.amount|floatformat:2 }} руб.
+        </h2>
+        <p class="card-text">
+            Категория: {{ income.category|default:"Без категории" }}
+        </p>
+        <p class="card-text">
+            Дата: {{ income.date }}
+        </p>
+        <a href="{% url 'incomes:detail' income.id %}"
+           class="btn btn-success">
+            Подробнее
+        </a>
+    </div>
+</article>

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% if income %}
+{{ income.category }} — Finance Planner
+{% else %}
+Доход не найден — Finance Planner
+{% endif %}
+{% endblock %}
+
+{% block content %}
+{% if income %}
+<div class="card">
+    <div class="card-body">
+        <h1 class="card-title">Доход №{{ income.id }}</h1>
+        <p class="card-text">
+            <strong>Сумма:</strong>
+            {{ income.amount|floatformat:2 }} руб.
+        </p>
+        <p class="card-text">
+            <strong>Категория:</strong>
+            {{ income.category|default:"Без категории" }}
+        </p>
+        <p class="card-text">
+            <strong>Дата:</strong>
+            {{ income.date }}
+        </p>
+    </div>
+</div>
+{% else %}
+<h1 class="text-danger">Доход не найден</h1>
+<p>Доход с указанным идентификатором отсутствует.</p>
+{% endif %}
+
+<a href="{% url 'incomes:list' %}"
+   class="btn btn-outline-secondary mt-3">
+    ← к списку доходов
+</a>
+{% endblock %}

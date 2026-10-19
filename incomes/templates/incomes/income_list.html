@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}
+Доходы — Finance Planner
+{% endblock %}
+
+{% block content %}
+<h1>Доходы</h1>
+
+<p>Всего доходов: {{ incomes|length }}</p>
+
+<div class="incomes-list">
+    {% for income in incomes %}
+        {% include "incomes/includes/income_card.html" %}
+    {% empty %}
+        <div class="alert alert-info">
+            Доходов пока нет.
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

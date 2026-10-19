@@ -1,10 +1,9 @@
-"""Маршруты приложения incomes."""
-
 from django.urls import path
-
 from . import views
 
+app_name = "incomes"
+
 urlpatterns = [
-    path("", views.incomes, name="incomes"),
-    path("<int:income_id>/", views.income_detail, name="income_detail"),
+    path("", views.incomes, name="list"),
+    path("<int:income_id>/", views.income_detail, name="detail"),
 ]
