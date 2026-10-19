@@ -1,0 +1,70 @@
+/* Собственные стили Finance Planner */
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1 0 auto;
+}
+
+.finance-planner-logo {
+    width: 48px;
+    height: 48px;
+    margin: 0.5rem 1rem 0.5rem 0;
+    vertical-align: middle;
+}
+
+/* Карточки доходов, расходов, бюджетов */
+.income-card,
+.expense-card,
+.budget-card {
+    border-left-width: 6px;
+    border-left-style: solid;
+    transition: box-shadow 0.2s ease;
+}
+
+.income-card {
+    border-left-color: #198754;
+}
+
+.expense-card {
+    border-left-color: #dc3545;
+}
+
+.budget-card {
+    border-left-color: #0d6efd;
+}
+
+.income-card:hover,
+.expense-card:hover,
+.budget-card:hover {
+    box-shadow: 0 0 0 0.15rem rgba(0, 0, 0, 0.1);
+}
+
+/* Бейджи статуса бюджета */
+.budget-status {
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    padding: 0.4em 0.65em;
+}
+
+.budget-status-achieved {
+    background-color: #198754;
+}
+
+.budget-status-active {
+    background-color: #0d6efd;
+}
+
+/* Подвал */
+footer {
+    color: #6c757d;
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 1rem 0;
+    border-top: 1px solid #dee2e6;
+    margin-top: 2rem;
+}
