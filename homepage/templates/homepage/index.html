@@ -8,7 +8,13 @@
 <h1 class="display-4">Finance Planner</h1>
 <p class="lead">Сервис финансового планирования.</p>
 <p>Основные разделы:</p>
-<a href="/incomes/" class="btn btn-success me-2">Доходы</a>
-<a href="/expenses/" class="btn btn-danger me-2">Расходы</a>
-<a href="/budgets/" class="btn btn-primary">Бюджеты</a>
+<a href="{% url 'incomes:list' %}" class="btn btn-success me-2">
+    Доходы
+</a>
+<a href="{% url 'expenses:list' %}" class="btn btn-danger me-2">
+    Расходы
+</a>
+<a href="{% url 'budgets:list' %}" class="btn btn-primary">
+    Бюджеты
+</a>
 {% endblock %}
