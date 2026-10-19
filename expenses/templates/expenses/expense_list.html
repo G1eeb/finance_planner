@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}
+Расходы — Finance Planner
+{% endblock %}
+
+{% block content %}
+<h1>Расходы</h1>
+
+<p>Всего расходов: {{ expenses|length }}</p>
+
+<div class="expenses-list">
+    {% for expense in expenses %}
+        {% include "expenses/includes/expense_card.html" %}
+    {% empty %}
+        <div class="alert alert-info">
+            Расходов пока нет.
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

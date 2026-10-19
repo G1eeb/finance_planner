@@ -1,0 +1,17 @@
+<article class="card expense-card mb-3">
+    <div class="card-body">
+        <h2 class="card-title">
+            {{ expense.amount|floatformat:2 }} руб.
+        </h2>
+        <p class="card-text">
+            Категория: {{ expense.category|default:"Без категории" }}
+        </p>
+        <p class="card-text">
+            Дата: {{ expense.date }}
+        </p>
+        <a href="{% url 'expenses:detail' expense.id %}"
+           class="btn btn-danger">
+            Подробнее
+        </a>
+    </div>
+</article>
