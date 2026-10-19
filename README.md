@@ -156,8 +156,9 @@
 
 ### Веб-версия (Django)
 
-    python manage.py migrate        # первый раз — служебные таблицы
-    python manage.py runserver
+    python manage.py check  # проверка конфигурации проекта
+    python manage.py migrate    # применение миграций Django (создание служебных таблиц)
+    python manage.py runserver  # запуск сервера
 
 Открыть в браузере: `http://127.0.0.1:8000/`
 
