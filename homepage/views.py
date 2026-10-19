@@ -1,6 +1,7 @@
 """View-функции приложения homepage."""
 
 from django.http import HttpResponse
+from django.shortcuts import render
 
 BOOTSTRAP_CSS = (
     "https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
@@ -36,16 +37,7 @@ def page(title, content):
 
 
 def index(request):
-    """Главная страница."""
-    content = """
-    <h1 class="display-4">Finance Planner</h1>
-    <p class="lead">Сервис финансового планирования.</p>
-    <p>Основные разделы:</p>
-    <a href="/incomes/" class="btn btn-success me-2">Доходы</a>
-    <a href="/expenses/" class="btn btn-danger me-2">Расходы</a>
-    <a href="/budgets/" class="btn btn-primary">Бюджеты</a>
-    """
-    return HttpResponse(page("Finance Planner", content))
+    return render(request, "homepage/index.html")
 
 
 def page_not_found(request, exception):
