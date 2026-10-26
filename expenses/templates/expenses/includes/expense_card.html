@@ -4,7 +4,7 @@
             {{ expense.amount|floatformat:2 }} руб.
         </h2>
         <p class="card-text">
-            Категория: {{ expense.category|default:"Без категории" }}
+            Категория: {{ expense.category_name|default:"Без категории" }}
         </p>
         <p class="card-text">
             Дата: {{ expense.date }}

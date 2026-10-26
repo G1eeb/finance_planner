@@ -4,7 +4,7 @@
             {{ income.amount|floatformat:2 }} руб.
         </h2>
         <p class="card-text">
-            Категория: {{ income.category|default:"Без категории" }}
+            Категория: {{ income.category_name|default:"Без категории" }}
         </p>
         <p class="card-text">
             Дата: {{ income.date }}
