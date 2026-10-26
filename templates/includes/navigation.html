@@ -4,20 +4,15 @@
             Finance Planner
         </a>
         <div class="navbar-nav">
-            <a class="nav-link" href="{% url 'homepage:index' %}">
-                Главная
-            </a>
-            <a class="nav-link" href="{% url 'incomes:list' %}">
-                Доходы
-            </a>
-            <a class="nav-link" href="{% url 'expenses:list' %}">
-                Расходы
-            </a>
-            <a class="nav-link" href="{% url 'budgets:list' %}">
-                Бюджеты
+            <a class="nav-link" href="{% url 'homepage:index' %}">Главная</a>
+            <a class="nav-link" href="{% url 'incomes:list' %}">Доходы</a>
+            <a class="nav-link" href="{% url 'expenses:list' %}">Расходы</a>
+            <a class="nav-link" href="{% url 'budgets:list' %}">Бюджеты</a>
+            <a class="nav-link" href="{% url 'incomes:statistics' %}">
+                Статистика доходов
             </a>
             <a class="nav-link" href="{% url 'expenses:statistics' %}">
-                Статистика
+                Статистика расходов
             </a>
         </div>
     </div>

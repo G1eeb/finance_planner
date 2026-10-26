@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}
+Статистика доходов — Finance Planner
+{% endblock %}
+
+{% block content %}
+<h1>Статистика доходов по категориям</h1>
+
+{% if stats %}
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Категория</th>
+            <th>Количество</th>
+            <th>Сумма</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in stats %}
+        <tr>
+            <td>{{ item.category_name }}</td>
+            <td>{{ item.count }}</td>
+            <td>{{ item.total|floatformat:2 }} руб.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div class="alert alert-info">
+    Данных о доходах пока нет.
+</div>
+{% endif %}
+
+<a href="{% url 'incomes:list' %}"
+   class="btn btn-outline-secondary mt-3">
+    ← к списку доходов
+</a>
+{% endblock %}

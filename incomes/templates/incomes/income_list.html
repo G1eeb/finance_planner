@@ -7,6 +7,10 @@
 {% block content %}
 <h1>Доходы</h1>
 
+<a href="{% url 'incomes:filter' %}" class="btn btn-outline-success mb-3">
+    Поиск по датам
+</a>
+
 <p>Всего доходов: {{ incomes|length }}</p>
 
 <div class="incomes-list">
