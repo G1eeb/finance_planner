@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}
+Статистика расходов — Finance Planner
+{% endblock %}
+
+{% block content %}
+<h1>Статистика расходов по категориям</h1>
+
+{% if stats %}
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Категория</th>
+            <th>Количество</th>
+            <th>Сумма</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in stats %}
+        <tr>
+            <td>{{ item.category_name }}</td>
+            <td>{{ item.count }}</td>
+            <td>{{ item.total|floatformat:2 }} руб.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div class="alert alert-info">
+    Данных о расходах пока нет.
+</div>
+{% endif %}
+
+<a href="{% url 'expenses:list' %}"
+   class="btn btn-outline-secondary mt-3">
+    ← к списку расходов
+</a>
+{% endblock %}

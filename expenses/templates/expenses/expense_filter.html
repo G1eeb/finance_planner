@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}
+Поиск расходов — Finance Planner
+{% endblock %}
+
+{% block content %}
+<h1>Поиск расходов по датам</h1>
+
+<form method="get" class="mb-4">
+    <div class="row g-3 align-items-end">
+        <div class="col-auto">
+            <label for="date_from" class="form-label">Дата с:</label>
+            <input type="date" id="date_from" name="date_from"
+                   class="form-control" value="{{ date_from }}">
+        </div>
+        <div class="col-auto">
+            <label for="date_to" class="form-label">Дата по:</label>
+            <input type="date" id="date_to" name="date_to"
+                   class="form-control" value="{{ date_to }}">
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-danger">
+                Найти
+            </button>
+        </div>
+    </div>
+</form>
+
+{% if date_from and date_to %}
+    <h2>Результаты</h2>
+    <p>
+        Период: {{ date_from }} — {{ date_to }},
+        найдено: {{ expenses|length }}
+    </p>
+
+    <div class="expenses-list">
+        {% for expense in expenses %}
+            {% include "expenses/includes/expense_card.html" %}
+        {% empty %}
+            <div class="alert alert-info">
+                За указанный период расходов нет.
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<a href="{% url 'expenses:list' %}"
+   class="btn btn-outline-secondary mt-3">
+    ← к списку расходов
+</a>
+{% endblock %}
