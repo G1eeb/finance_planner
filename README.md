@@ -3,8 +3,8 @@
 Приложение для учёта личных доходов и расходов, контроля месячного бюджета
 и отслеживания финансовых целей.
 
-**Веб-интерфейс реализован на Django с использованием системы шаблонов
-Django Template Language (DTL).**
+**Веб-интерфейс:** Django + Django Template Language (DTL).
+**Хранение данных:** SQLite (с ПР7). JSON сохранён как предыдущая реализация.
 
 ## 1. Назначение проекта
 
@@ -12,8 +12,9 @@ Finance Planner — учебное приложение для управлен�
 и месячными бюджетами. Проект развивается поэтапно:
 
 - ПР1–ПР3 — предметная область на Python (классы, JSON-хранилище);
-- ПР5 — веб-интерфейс на Django (HTML формировался в Python);
-- ПР6 — переход на **систему шаблонов Django**.
+- ПР5 — веб-интерфейс на Django (HTML в Python);
+- ПР6 — переход на **систему шаблонов Django**;
+- ПР7 — **слой реляционной базы данных SQLite**.
 
 ## 2. Используемые технологии
 
@@ -22,364 +23,256 @@ Finance Planner — учебное приложение для управлен�
 - **Django Template Language (DTL)**;
 - **HTML5**, **CSS3**, **JavaScript**;
 - **Bootstrap 5** (CDN);
-- **JSON** — источник данных;
-- **Git**;
-- **pytest**, **flake8**.
+- **SQLite 3** — база данных (файл `data/finance_planner.sqlite`);
+- **json** — предыдущая реализация хранилища;
+- **Git**, **pytest**, **flake8**.
 
 ## 3. Предметная область
 
-Три основные сущности:
+Четыре таблицы базы данных:
 
-- **Income** — доход (`id`, `amount`, `category`, `date`);
-- **Expense** — расход (`id`, `amount`, `category`, `date`);
-- **Budget** — месячный бюджет (`id`, `month`, `monthly_budget`,
-  `current_expenses`).
+| Таблица | Назначение |
+|---|---|
+| **categories** | справочник категорий (уникальные названия) |
+| **incomes** | доходы |
+| **expenses** | расходы |
+| **budgets** | месячные бюджеты |
 
-Для предметной области реализованы собственные Python-классы в пакете `models/`.
+## 4. Структура базы данных
 
-**На текущем этапе данные хранятся в JSON-файлах. Django ORM
-и база данных приложения пока не используются.**
+### 4.1. Таблица `categories`
 
-## 4. Структура проекта
-# Finance Planner — сервис финансового планирования
+| Поле | Тип | Назначение |
+|---|---|---|
+| `id` | INTEGER | PK — идентификатор |
+| `name` | TEXT | название категории, UNIQUE, NOT NULL |
 
-Приложение для учёта личных доходов и расходов, контроля месячного бюджета
-и отслеживания финансовых целей.
+### 4.2. Таблица `incomes` — доходы
 
-**Веб-интерфейс реализован на Django с использованием системы шаблонов
-Django Template Language (DTL).**
+| Поле | Тип | Назначение |
+|---|---|---|
+| `id` | INTEGER | PK — идентификатор |
+| `amount` | REAL | сумма, NOT NULL |
+| `category_id` | INTEGER | FK → `categories.id`, NOT NULL |
+| `date` | TEXT | дата в формате ISO (YYYY-MM-DD), NOT NULL |
 
-## 1. Назначение проекта
+### 4.3. Таблица `expenses` — расходы
 
-Finance Planner — учебное приложение для управления доходами, расходами
-и месячными бюджетами. Проект развивается поэтапно:
+| Поле | Тип | Назначение |
+|---|---|---|
+| `id` | INTEGER | PK — идентификатор |
+| `amount` | REAL | сумма, NOT NULL |
+| `category_id` | INTEGER | FK → `categories.id`, NOT NULL |
+| `date` | TEXT | дата в формате ISO (YYYY-MM-DD), NOT NULL |
 
-- ПР1–ПР3 — предметная область на Python (классы, JSON-хранилище);
-- ПР5 — веб-интерфейс на Django (HTML формировался в Python);
-- ПР6 — переход на **систему шаблонов Django**.
+### 4.4. Таблица `budgets` — бюджеты
 
-## 2. Используемые технологии
+| Поле | Тип | Назначение |
+|---|---|---|
+| `id` | INTEGER | PK — идентификатор |
+| `month` | TEXT | месяц в формате YYYY-MM, UNIQUE, NOT NULL |
+| `monthly_budget` | REAL | сумма бюджета, NOT NULL |
+| `current_expenses` | REAL | потрачено, NOT NULL, DEFAULT 0 |
 
-- **Python 3**;
-- **Django 5**;
-- **Django Template Language (DTL)**;
-- **HTML5**, **CSS3**, **JavaScript**;
-- **Bootstrap 5** (CDN);
-- **JSON** — источник данных;
-- **Git**;
-- **pytest**, **flake8**.
+### 4.5. Ключи
 
-## 3. Предметная область
+- **Первичные ключи (`PRIMARY KEY`)** — `id` в каждой таблице.
+- **Внешние ключи (`FOREIGN KEY`)**:
+  - `incomes.category_id → categories.id`;
+  - `expenses.category_id → categories.id`.
 
-Три основные сущности:
+При каждом подключении включается проверка внешних ключей
+(`PRAGMA foreign_keys = ON`) — это гарантирует целостность данных.
 
-- **Income** — доход (`id`, `amount`, `category`, `date`);
-- **Expense** — расход (`id`, `amount`, `category`, `date`);
-- **Budget** — месячный бюджет (`id`, `month`, `monthly_budget`,
-  `current_expenses`).
-
-Для предметной области реализованы собственные Python-классы в пакете `models/`.
-
-**На текущем этапе данные хранятся в JSON-файлах. Django ORM
-и база данных приложения пока не используются.**
-
-## 4. Структура проекта
+## 5. Файлы базы данных
 
 ```
 finance_planner/
-├── manage.py
-├── requirements.txt
-├── README.md
-├── .flake8
-├── .gitignore
-├── finance_planner_django/         — пакет настроек Django
-│   ├── __init__.py
-│   ├── settings.py
-│   ├── urls.py
-│   ├── asgi.py
-│   └── wsgi.py
-├── templates/                      — шаблоны уровня проекта
-│   ├── base.html
-│   ├── 404.html
-│   └── includes/
-│       └── navigation.html
-├── homepage/                       — Django-приложение (главная, 404)
-│   ├── templates/homepage/index.html
-│   ├── static/homepage/
-│   │   ├── css/style.css
-│   │   ├── js/main.js
-│   │   └── img/logo.svg
-│   ├── views.py
-│   └── urls.py
-├── incomes/                        — Django-приложение (доходы)
-│   ├── templates/incomes/
-│   │   ├── income_list.html
-│   │   ├── income_detail.html
-│   │   └── includes/income_card.html
-│   ├── views.py
-│   └── urls.py
-├── expenses/                       — Django-приложение (расходы)
-│   ├── templates/expenses/
-│   │   ├── expense_list.html
-│   │   ├── expense_detail.html
-│   │   └── includes/expense_card.html
-│   ├── views.py
-│   └── urls.py
-├── budgets/                        — Django-приложение (бюджеты)
-│   ├── templates/budgets/
-│   │   ├── budget_list.html
-│   │   ├── budget_detail.html
-│   │   └── includes/budget_status.html
-│   ├── views.py
-│   └── urls.py
-├── models/                         — классы предметной области (ПР3)
-│   ├── __init__.py
-│   ├── incomes.py
-│   ├── expenses.py
-│   └── budgets.py
-├── data/                           — JSON-файлы данных
-│   ├── incomes.json
-│   ├── expenses.json
-│   └── budgets.json
-├── tests/                          — тесты pytest
-│   ├── test_incomes.py
-│   ├── test_expenses.py
-│   └── test_budgets.py
-├── main.py                         — консольная версия (ПР3)
-├── storage.py                      — JSON ↔ объекты
-├── utils.py                        — безопасный ввод
-└── conftest.py
+├── data/
+│   └── finance_planner.sqlite      ← файл БД (генерируется, в .gitignore)
+├── sql/
+│   ├── schema.sql                  ← CREATE TABLE
+│   └── queries.sql                 ← 16 SQL-запросов проекта
+└── db/
+    ├── __init__.py
+    ├── database.py                 ← get_connection() + PRAGMA foreign_keys = ON
+    └── import_json.py              ← перенос JSON → SQLite
 ```
 
-## 5. Веб-интерфейс
+**`sql/schema.sql`** — команды создания таблиц `categories`, `incomes`,
+`expenses`, `budgets` с полями, типами и ограничениями (`PRIMARY KEY`,
+`FOREIGN KEY`, `NOT NULL`, `UNIQUE`, `DEFAULT`).
 
-Основные страницы:
+**`sql/queries.sql`** — 16 SQL-запросов с комментариями, покрывающих:
 
-| URL | View-функция | Что показывает |
-|---|---|---|
-| `/` | `homepage.views.index` | Главная с навигацией |
-| `/incomes/` | `incomes.views.incomes` | Список доходов |
-| `/incomes/<int:income_id>/` | `incomes.views.income_detail` | Карточка дохода |
-| `/expenses/` | `expenses.views.expenses` | Список расходов |
-| `/expenses/<int:expense_id>/` | `expenses.views.expense_detail` | Карточка расхода |
-| `/budgets/` | `budgets.views.budgets` | Список бюджетов |
-| `/budgets/<int:budget_id>/` | `budgets.views.budget_detail` | Карточка бюджета + калькулятор (`?planned=X`) |
+- выборку списков (`SELECT`);
+- фильтрацию (`WHERE`);
+- соединение таблиц (`JOIN`);
+- агрегатные функции (`COUNT`, `SUM`, `AVG`);
+- группировку (`GROUP BY`);
+- фильтрацию групп (`HAVING`);
+- параметризованные запросы (`?`).
 
-**HTML формируется шаблонами.** Генерация HTML в Python-коде **не используется**.
-Функция `page()` удалена полностью.
+**`db/import_json.py`** — скрипт переноса данных из JSON в SQLite:
 
-## 6. Django Template Language
+- собирает уникальные категории из `incomes` и `expenses`;
+- вставляет категории в `categories`, строит маппинг `имя → id`;
+- вставляет доходы, расходы и бюджеты через `executemany`;
+- транзакция: `commit()` при успехе, `rollback()` при ошибке.
 
-### 6.1. Базовый шаблон
+**`db/database.py`** — `get_connection()` с `PRAGMA foreign_keys = ON`.
 
-Общий шаблон: `templates/base.html`. Содержит:
+## 6. Получение данных из SQLite в Django
 
-- общую HTML-структуру;
-- подключение Bootstrap и **собственного CSS**;
-- логотип через `{% static %}`;
-- навигацию через `{% include %}`;
-- подвал с годом (выводится через JavaScript);
-- блоки `{% block title %}` и `{% block content %}`.
+Все view-функции используют **`sqlite3` из стандартной библиотеки** —
+**Django ORM не используется**.
 
-Дочерние шаблоны используют наследование:
-
-```django
-{% extends "base.html" %}
-```
-
-Заголовок и содержимое переопределяются:
-
-```django
-{% block title %}…{% endblock %}
-{% block content %}…{% endblock %}
-```
-
-### 6.2. Включаемые шаблоны
-
-Повторяющиеся фрагменты вынесены в отдельные файлы:
-
-- `includes/navigation.html` — навигация;
-- `incomes/includes/income_card.html` — карточка дохода;
-- `expenses/includes/expense_card.html` — карточка расхода;
-- `budgets/includes/budget_status.html` — статус бюджета.
-
-Подключение:
-
-```django
-{% include "incomes/includes/income_card.html" %}
-```
-
-### 6.3. Контекст
-
-View-функции передают данные в шаблоны через словарь:
+Основной порядок:
 
 ```python
-context = {"incomes": incomes_list}
-return render(request, "incomes/income_list.html", context)
+conn = sqlite3.connect(DB_PATH)
+conn.row_factory = sqlite3.Row       # доступ по именам полей
+rows = conn.execute(sql, params).fetchall()
+conn.close()
 ```
 
-В шаблоне данные доступны по имени:
+- **`row_factory = sqlite3.Row`** — доступ к полям по именам (`row["name"]`),
+  а не по индексам (`row[0]`);
+- **параметризованные запросы** (`?`) — значения передаются отдельно
+  от SQL-текста, **без f-строк и конкатенации**.
 
-```django
-{% for income in incomes %}
-```
-
-### 6.4. Циклы и условия
-
-```django
-{% for income in incomes %}
-    …
-{% empty %}
-    <p>Доходов пока нет.</p>
-{% endfor %}
-```
-
-Условия — для статуса бюджета и обработки 404:
-
-```django
-{% if budget.is_achieved %}
-    Достигнут
-{% else %}
-    В процессе
-{% endif %}
-```
-
-### 6.5. Фильтры шаблонов
-
-- `{{ incomes|length }}` — количество элементов;
-- `{{ income.category|default:"Без категории" }}` — значение по умолчанию;
-- `{{ income.amount|floatformat:2 }}` — число с 2 знаками.
-
-Фильтры используются **только для представления**, не для бизнес-логики.
-
-## 7. Именованные URL и пространства имён
-
-В каждом `urls.py` объявлено:
+**Пример из `incomes/views.py`:**
 
 ```python
-app_name = "incomes"
+income = conn.execute("""
+    SELECT i.id, i.amount, i.date,
+           c.name AS category_name
+    FROM incomes i
+    JOIN categories c ON i.category_id = c.id
+    WHERE i.id = ?
+""", (income_id,)).fetchone()
 ```
 
-Имена маршрутов: `list`, `detail`. Ссылки в шаблонах:
+## 7. Страницы, использующие данные из SQLite
 
-```django
-{% url 'incomes:list' %}
-{% url 'incomes:detail' income.id %}
-```
-
-Пространства имён: `homepage`, `incomes`, `expenses`, `budgets`.
-
-## 8. Статические файлы
-
-Каталог: `homepage/static/homepage/`.
-
-| Ресурс | Путь | Где используется |
+| URL | Что показывает | Ключевые SQL-приёмы |
 |---|---|---|
-| CSS | `css/style.css` | `base.html`, карточки, статус |
-| JS | `js/main.js` | `base.html` (год в подвале) |
-| Логотип | `img/logo.svg` | `base.html` |
+| `/incomes/` | Список доходов | `JOIN` |
+| `/incomes/<int:id>/` | Карточка дохода | `JOIN` + `WHERE` + параметр |
+| `/incomes/filter/` | Поиск доходов по датам | `BETWEEN` + 2 параметра |
+| `/incomes/statistics/` | Статистика доходов по категориям | `GROUP BY` + `SUM` + `COUNT` |
+| `/expenses/` | Список расходов | `JOIN` |
+| `/expenses/<int:id>/` | Карточка расхода | `JOIN` + `WHERE` + параметр |
+| `/expenses/filter/` | Поиск расходов по датам | `BETWEEN` + 2 параметра |
+| `/expenses/statistics/` | Статистика расходов по категориям | `GROUP BY` + `SUM` + `COUNT` |
+| `/budgets/` | Список бюджетов | вычисляемые поля `remaining`, `is_overspent` |
+| `/budgets/<int:id>/` | Бюджет + калькулятор `?planned=X` | вычисляемые поля + GET-параметр |
 
-Подключение через:
+## 8. Веб-интерфейс (Django Template Language)
 
-```django
-{% load static %}
-{% static 'homepage/css/style.css' %}
-```
+Используется **система шаблонов Django**:
 
-Собственный CSS оформляет карточки доходов, расходов, бюджетов
-и бейджи статусов. JavaScript выводит текущий год в подвал.
+- **базовый шаблон** `templates/base.html` с блоками `{% block title %}`
+  и `{% block content %}`;
+- **наследование** через `{% extends "base.html" %}`;
+- **включаемые шаблоны** через `{% include %}` — навигация, карточки;
+- **контекст** — данные передаются через `render(request, tpl, context)`;
+- **циклы** `{% for %}` и `{% empty %}`, **условия** `{% if %}`;
+- **именованные URL** через `{% url %}` с пространствами имён
+  (`homepage`, `incomes`, `expenses`, `budgets`);
+- **фильтры** — `length`, `default`, `floatformat`.
 
-## 9. Хранение данных
+Функция `page()` из ПР5 удалена — все представления используют `render()`.
 
-На текущем этапе данные хранятся в JSON-файлах:
+## 9. Статические файлы
 
-- `data/incomes.json`;
-- `data/expenses.json`;
-- `data/budgets.json`.
+Каталог `homepage/static/homepage/`:
 
-Загрузка — через `storage.py`. Классы предметной области — в `models/`.
+- `css/style.css` — собственные стили (карточки, бейджи, подвал);
+- `js/main.js` — вывод текущего года в подвал;
+- `img/logo.svg` — логотип.
 
-**Django ORM и база данных пока не используются** — это задача следующих ПР.
+Подключение через `{% load static %}` + `{% static %}`.
 
-## 10. Основные модули
+## 10. Консольная версия (сохранена)
 
-- **`storage.py`** — загрузка данных из JSON;
-- **`models/`** — классы `Income`, `Expense`, `Budget`;
-- **`main.py`** — консольная версия приложения (сохранена с ПР3);
-- **`utils.py`** — вспомогательные функции ввода;
-- **`incomes/views.py`, `expenses/views.py`, `budgets/views.py`,
-  `homepage/views.py`** — view-функции на `render()`.
+- `main.py` — консольное приложение (ПР3);
+- `storage.py` — JSON ↔ объекты;
+- `models/` — классы `Income`, `Expense`, `Budget`;
+- `utils.py` — безопасный ввод;
+- `tests/` — 30 тестов pytest.
 
-## 11. Тестирование
+**Консольная версия и тесты работают с JSON** — это **предыдущая реализация**
+предметной области, сохранена по методичке. Django ORM **не используется** —
+это задача следующих ПР.
 
-Тесты в каталоге `tests/`:
+## 11. Запуск
 
-- `test_incomes.py`;
-- `test_expenses.py`;
-- `test_budgets.py`.
-
-Запуск:
+### Первая установка
 
 ```bash
-pytest -v
+pip install -r requirements.txt
+
+# 1. Создать пустую БД
+python -c "import sqlite3; sqlite3.connect('data/finance_planner.sqlite').close()"
+
+# 2. Применить схему
+python -c "import sqlite3; conn=sqlite3.connect('data/finance_planner.sqlite'); conn.executescript(open('sql/schema.sql', encoding='utf-8').read()); conn.commit(); conn.close()"
+
+# 3. Импортировать данные из JSON
+python -m db.import_json
 ```
 
-## 12. Проверка качества кода
-
-```bash
-flake8 . --extend-exclude=venv
-```
-
-## 13. Запуск проекта
+### Веб-версия
 
 ```bash
 python manage.py runserver
 ```
 
-Веб-интерфейс: `http://127.0.0.1:8000/`.
+Открыть `http://127.0.0.1:8000/`.
 
-## 14. Git
-
-Каждый этап фиксируется отдельным коммитом с префиксом практической работы:
+### Консольная версия
 
 ```bash
-git add .
-git commit -m "PR6: …"
+python main.py
 ```
 
-## 15. Текущее состояние проекта
+## 12. Тестирование и проверка
+
+```bash
+pytest -v
+flake8 . --extend-exclude=venv
+python manage.py check
+```
+
+## 13. Текущее состояние проекта
 
 Реализовано:
 
 - классы предметной области `Income`, `Expense`, `Budget` (ПР3);
-- консольный интерфейс;
-- JSON-хранилище;
-- Django-проект и четыре Django-приложения;
-- веб-представления для основных сущностей;
-- **Django Template Language**;
-- наследование шаблонов;
-- базовый шаблон `base.html`;
-- блоки `block`;
-- включаемые шаблоны `include`;
-- передача данных через контекст;
-- циклы и условия;
-- фильтры шаблонов;
-- именованные URL и пространства имён;
-- статические файлы (CSS, JS, логотип);
-- собственное оформление интерфейса;
-- тесты предметной области.
+- консольный интерфейс, JSON-хранилище, тесты;
+- Django-проект, четыре приложения (`homepage`, `incomes`, `expenses`,
+  `budgets`);
+- **система шаблонов Django** (ПР6);
+- **база данных SQLite**: таблицы `categories`, `incomes`, `expenses`,
+  `budgets` с PK и FK;
+- **SQL-запросы** (`SELECT`, `WHERE`, `JOIN`, агрегаты, `GROUP BY`,
+  `HAVING`, параметризованные);
+- **поиск** доходов и расходов по диапазону дат;
+- **статистика** доходов и расходов по категориям;
+- получение данных из SQLite в Django-views;
+- навигация со всеми разделами.
 
 **Не реализовано (на следующих ПР):**
 
 - Django ORM и модели Django;
 - формы Django;
-- работа с базой данных;
-- операции создания/редактирования/удаления через веб-формы;
-- аутентификация пользователей.
+- аутентификация пользователей;
+- операции создания/редактирования через веб-формы.
 
-## 16. Дальнейшее развитие
+## 14. Дальнейшее развитие
 
-- переход от JSON к базе данных и Django ORM;
-- формы Django для создания и редактирования;
-- валидация пользовательского ввода;
+- переход на Django ORM и модели Django;
+- формы создания и редактирования записей;
+- аутентификация;
 - API.
