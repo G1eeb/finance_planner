@@ -34,3 +34,7 @@ db.sqlite3-journal
 # Windows system files
 desktop.ini
 Thumbs.db
+
+# SQLite database
+*.sqlite
+*.sqlite3
