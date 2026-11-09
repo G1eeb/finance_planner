@@ -1,28 +1,13 @@
-"""View-функции приложения budgets."""
+"""View-функции приложения budgets (Django ORM)."""
 
-import sqlite3
+from django.shortcuts import get_object_or_404, render
 
-from django.shortcuts import render
-
-DB_PATH = "data/finance_planner.sqlite"
+from budgets.models import Budget
 
 
 def budgets(request):
-    """Список бюджетов из БД."""
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    budgets_list = conn.execute("""
-        SELECT id, month, monthly_budget, current_expenses,
-               (monthly_budget - current_expenses) AS remaining,
-               CASE
-                   WHEN current_expenses > monthly_budget THEN 1
-                   ELSE 0
-               END AS is_overspent
-        FROM budgets
-        ORDER BY month DESC
-    """).fetchall()
-    conn.close()
-
+    """Список бюджетов из БД через ORM."""
+    budgets_list = Budget.objects.order_by("-month")
     return render(
         request,
         "budgets/budget_list.html",
@@ -31,35 +16,13 @@ def budgets(request):
 
 
 def budget_detail(request, budget_id):
-    """Бюджет с калькулятором (?planned=X)."""
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    budget = conn.execute("""
-        SELECT id, month, monthly_budget, current_expenses,
-               (monthly_budget - current_expenses) AS remaining,
-               CASE
-                   WHEN current_expenses > monthly_budget THEN 1
-                   ELSE 0
-               END AS is_overspent
-        FROM budgets
-        WHERE id = ?
-    """, (budget_id,)).fetchone()
-    conn.close()
+    """Бюджет с калькулятором (?planned=X) через ORM."""
+    budget = get_object_or_404(Budget, pk=budget_id)
 
-    if budget is None:
-        return render(
-            request,
-            "budgets/budget_detail.html",
-            {"budget": None},
-            status=404,
-        )
-
-    remaining = budget["remaining"]
     planned_raw = request.GET.get("planned")
-
     context = {
         "budget": budget,
-        "remaining": remaining,
+        "remaining": budget.remaining,
         "error": None,
         "can_afford": None,
         "remaining_after": None,
@@ -69,13 +32,23 @@ def budget_detail(request, budget_id):
     if planned_raw:
         try:
             planned = float(planned_raw)
-            if planned <= remaining:
+            if budget.can_afford(planned):
                 context["can_afford"] = True
-                context["remaining_after"] = remaining - planned
+                context["remaining_after"] = (
+                    budget.remaining - planned
+                )
             else:
                 context["can_afford"] = False
-                context["overspend"] = planned - remaining
+                context["overspend"] = (
+                    planned - budget.remaining
+                )
         except ValueError:
-            context["error"] = "Некорректное значение планируемой траты."
+            context["error"] = (
+                "Некорректное значение планируемой траты."
+            )
 
-    return render(request, "budgets/budget_detail.html", context)
+    return render(
+        request,
+        "budgets/budget_detail.html",
+        context,
+    )
