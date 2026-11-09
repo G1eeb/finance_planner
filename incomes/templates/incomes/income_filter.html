@@ -27,6 +27,10 @@
     </div>
 </form>
 
+{% if error %}
+<div class="alert alert-warning">{{ error }}</div>
+{% endif %}
+
 {% if date_from and date_to %}
     <h2>Результаты</h2>
     <p>

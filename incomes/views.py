@@ -1,25 +1,20 @@
-"""View-функции приложения incomes."""
+"""View-функции приложения incomes (Django ORM)."""
 
-import sqlite3
+from datetime import datetime
 
-from django.shortcuts import render
+from django.db.models import Count, F, Sum
+from django.shortcuts import get_object_or_404, render
 
-DB_PATH = "data/finance_planner.sqlite"
+from incomes.models import Income
 
 
 def incomes(request):
-    """Список доходов из БД."""
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    incomes_list = conn.execute("""
-        SELECT i.id, i.amount, i.date,
-               c.name AS category_name
-        FROM incomes i
-        JOIN categories c ON i.category_id = c.id
-        ORDER BY i.date DESC
-    """).fetchall()
-    conn.close()
-
+    """Список доходов из БД через ORM."""
+    incomes_list = (
+        Income.objects
+        .annotate(category_name=F("category__name"))
+        .order_by("-date")
+    )
     return render(
         request,
         "incomes/income_list.html",
@@ -28,44 +23,38 @@ def incomes(request):
 
 
 def income_detail(request, income_id):
-    """Карточка дохода из БД."""
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    income = conn.execute("""
-        SELECT i.id, i.amount, i.date,
-               c.name AS category_name
-        FROM incomes i
-        JOIN categories c ON i.category_id = c.id
-        WHERE i.id = ?
-    """, (income_id,)).fetchone()
-    conn.close()
-
+    """Карточка дохода из БД через ORM."""
+    income = get_object_or_404(
+        Income.objects.select_related("category"),
+        pk=income_id,
+    )
     return render(
         request,
         "incomes/income_detail.html",
         {"income": income},
-        status=404 if income is None else 200,
     )
 
 
 def income_filter(request):
-    """Поиск доходов по диапазону дат (параметризованный SQL)."""
+    """Поиск доходов по диапазону дат через ORM."""
     date_from = request.GET.get("date_from", "").strip()
     date_to = request.GET.get("date_to", "").strip()
-
+    error = None
     incomes_list = []
+
     if date_from and date_to:
-        conn = sqlite3.connect(DB_PATH)
-        conn.row_factory = sqlite3.Row
-        incomes_list = conn.execute("""
-            SELECT i.id, i.amount, i.date,
-                   c.name AS category_name
-            FROM incomes i
-            JOIN categories c ON i.category_id = c.id
-            WHERE i.date BETWEEN ? AND ?
-            ORDER BY i.date DESC
-        """, (date_from, date_to)).fetchall()
-        conn.close()
+        try:
+            d_from = datetime.strptime(date_from, "%Y-%m-%d").date()
+            d_to = datetime.strptime(date_to, "%Y-%m-%d").date()
+        except ValueError:
+            error = "Укажите корректные даты в формате ГГГГ-ММ-ДД."
+        else:
+            incomes_list = (
+                Income.objects
+                .filter(date__range=(d_from, d_to))
+                .annotate(category_name=F("category__name"))
+                .order_by("-date")
+            )
 
     return render(
         request,
@@ -74,25 +63,19 @@ def income_filter(request):
             "incomes": incomes_list,
             "date_from": date_from,
             "date_to": date_to,
+            "error": error,
         },
     )
 
 
 def income_statistics(request):
-    """Статистика доходов по категориям (GROUP BY)."""
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    stats = conn.execute("""
-        SELECT c.name AS category_name,
-               SUM(i.amount) AS total,
-               COUNT(i.id) AS count
-        FROM incomes i
-        JOIN categories c ON i.category_id = c.id
-        GROUP BY c.id, c.name
-        ORDER BY total DESC
-    """).fetchall()
-    conn.close()
-
+    """Статистика доходов по категориям через ORM."""
+    stats = (
+        Income.objects
+        .values(category_name=F("category__name"))
+        .annotate(total=Sum("amount"), count=Count("id"))
+        .order_by("-total")
+    )
     return render(
         request,
         "incomes/income_statistics.html",

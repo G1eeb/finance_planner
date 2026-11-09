@@ -2,7 +2,7 @@
 
 {% block title %}
 {% if income %}
-{{ income.category }} — Finance Planner
+{{ income.category.name }} — Finance Planner
 {% else %}
 Доход не найден — Finance Planner
 {% endif %}
@@ -19,11 +19,11 @@
         </p>
         <p class="card-text">
             <strong>Категория:</strong>
-            {{ income.category_name|default:"Без категории" }}
+            {{ income.category.name|default:"Без категории" }}
         </p>
         <p class="card-text">
             <strong>Дата:</strong>
-            {{ income.date }}
+            {{ income.date|date:"d.m.Y" }}
         </p>
     </div>
 </div>
