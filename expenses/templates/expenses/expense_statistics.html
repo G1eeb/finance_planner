@@ -32,6 +32,15 @@
 </div>
 {% endif %}
 
+{% if categories_without %}
+<h2 class="mt-4">Категории без расходов</h2>
+<ul>
+    {% for c in categories_without %}
+        <li>{{ c.name }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+
 <a href="{% url 'expenses:list' %}"
    class="btn btn-outline-secondary mt-3">
     ← к списку расходов
