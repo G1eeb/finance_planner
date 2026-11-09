@@ -1,25 +1,20 @@
-"""View-функции приложения expenses."""
+"""View-функции приложения expenses (Django ORM)."""
 
-import sqlite3
+from datetime import datetime
 
-from django.shortcuts import render
+from django.db.models import Count, F, Sum
+from django.shortcuts import get_object_or_404, render
 
-DB_PATH = "data/finance_planner.sqlite"
+from expenses.models import Expense
 
 
 def expenses(request):
-    """Список расходов из БД."""
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    expenses_list = conn.execute("""
-        SELECT e.id, e.amount, e.date,
-               c.name AS category_name
-        FROM expenses e
-        JOIN categories c ON e.category_id = c.id
-        ORDER BY e.date DESC
-    """).fetchall()
-    conn.close()
-
+    """Список расходов из БД через ORM."""
+    expenses_list = (
+        Expense.objects
+        .annotate(category_name=F("category__name"))
+        .order_by("-date")
+    )
     return render(
         request,
         "expenses/expense_list.html",
@@ -28,44 +23,38 @@ def expenses(request):
 
 
 def expense_detail(request, expense_id):
-    """Карточка расхода из БД."""
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    expense = conn.execute("""
-        SELECT e.id, e.amount, e.date,
-               c.name AS category_name
-        FROM expenses e
-        JOIN categories c ON e.category_id = c.id
-        WHERE e.id = ?
-    """, (expense_id,)).fetchone()
-    conn.close()
-
+    """Карточка расхода из БД через ORM."""
+    expense = get_object_or_404(
+        Expense.objects.select_related("category"),
+        pk=expense_id,
+    )
     return render(
         request,
         "expenses/expense_detail.html",
         {"expense": expense},
-        status=404 if expense is None else 200,
     )
 
 
 def expense_filter(request):
-    """Поиск расходов по диапазону дат (параметризованный SQL)."""
+    """Поиск расходов по диапазону дат через ORM."""
     date_from = request.GET.get("date_from", "").strip()
     date_to = request.GET.get("date_to", "").strip()
-
+    error = None
     expenses_list = []
+
     if date_from and date_to:
-        conn = sqlite3.connect(DB_PATH)
-        conn.row_factory = sqlite3.Row
-        expenses_list = conn.execute("""
-            SELECT e.id, e.amount, e.date,
-                   c.name AS category_name
-            FROM expenses e
-            JOIN categories c ON e.category_id = c.id
-            WHERE e.date BETWEEN ? AND ?
-            ORDER BY e.date DESC
-        """, (date_from, date_to)).fetchall()
-        conn.close()
+        try:
+            d_from = datetime.strptime(date_from, "%Y-%m-%d").date()
+            d_to = datetime.strptime(date_to, "%Y-%m-%d").date()
+        except ValueError:
+            error = "Укажите корректные даты в формате ГГГГ-ММ-ДД."
+        else:
+            expenses_list = (
+                Expense.objects
+                .filter(date__range=(d_from, d_to))
+                .annotate(category_name=F("category__name"))
+                .order_by("-date")
+            )
 
     return render(
         request,
@@ -74,25 +63,19 @@ def expense_filter(request):
             "expenses": expenses_list,
             "date_from": date_from,
             "date_to": date_to,
+            "error": error,
         },
     )
 
 
 def expense_statistics(request):
-    """Статистика расходов по категориям (GROUP BY + HAVING)."""
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    stats = conn.execute("""
-        SELECT c.name AS category_name,
-               SUM(e.amount) AS total,
-               COUNT(e.id) AS count
-        FROM expenses e
-        JOIN categories c ON e.category_id = c.id
-        GROUP BY c.id, c.name
-        ORDER BY total DESC
-    """).fetchall()
-    conn.close()
-
+    """Статистика расходов по категориям через ORM."""
+    stats = (
+        Expense.objects
+        .values(category_name=F("category__name"))
+        .annotate(total=Sum("amount"), count=Count("id"))
+        .order_by("-total")
+    )
     return render(
         request,
         "expenses/expense_statistics.html",
