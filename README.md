@@ -99,3 +99,28 @@ Finance Planner — учебное приложение для управлен�
 ```bash
 python manage.py makemigrations   # создать миграции из моделей
 python manage.py migrate          # применить к db.sqlite3
+
+# SHELL
+# Одно условие
+from incomes.models import Income
+Income.objects.count()
+Income.objects.filter(category__name__icontains="Зар").count()
+Income.objects.filter(category__name__icontains="ав").count()
+
+# По категории «Зарплата» и сумме >= 10000
+Income.objects.filter(
+    category__name__icontains="Зар",
+    amount__gte=10000,
+).count()
+
+# Сумма >= 10000, но БЕЗ «Зарплаты»
+Income.objects.filter(
+    amount__gte=10000,
+).exclude(
+    category__name__icontains="Зар",
+).count()
+
+Income.objects.all()
+
+from categories.models import Category
+Category.objects.values_list("id", "name")
