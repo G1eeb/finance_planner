@@ -5,7 +5,7 @@ from decimal import Decimal, InvalidOperation
 from urllib.parse import urlencode
 
 from django.core.paginator import Paginator
-from django.db.models import Count, F, Sum
+from django.db.models import Count, F, Q, Sum
 from django.shortcuts import get_object_or_404, render
 
 from categories.models import Category
@@ -21,6 +21,9 @@ SORT_FIELDS = {
     "-category": "-category__name",
 }
 
+# Порог суммы для расширенного поиска (Q-объект)
+Q_AMOUNT_THRESHOLD = Decimal("50000")
+
 
 def _parse_decimal(value):
     """Попытаться превратить строку в Decimal. Вернуть None при ошибке."""
@@ -35,6 +38,7 @@ def _parse_decimal(value):
 def incomes(request):
     """Список доходов с фильтрами, сортировкой и пагинацией."""
     q = request.GET.get("q", "").strip()
+    search_q = request.GET.get("search_q", "").strip()
     category_id = request.GET.get("category", "").strip()
     exclude_category_id = request.GET.get(
         "exclude_category", ""
@@ -47,6 +51,12 @@ def incomes(request):
 
     if q:
         qs = qs.filter(category__name__icontains=q)
+
+    if search_q:
+        qs = qs.filter(
+            Q(category__name__icontains=search_q)
+            | Q(amount__gte=Q_AMOUNT_THRESHOLD)
+        )
 
     if category_id.isdigit():
         qs = qs.filter(category_id=int(category_id))
@@ -85,6 +95,7 @@ def incomes(request):
         "page_obj": page_obj,
         "categories": categories,
         "q": q,
+        "search_q": search_q,
         "selected_category": category_id,
         "exclude_category": exclude_category_id,
         "amount_min": amount_min,
@@ -93,6 +104,7 @@ def incomes(request):
         "total_sum": totals["total"] or Decimal("0"),
         "total_count": totals["cnt"] or 0,
         "page_url_prefix": page_url_prefix,
+        "q_threshold": Q_AMOUNT_THRESHOLD,
     }
     return render(request, "incomes/income_list.html", context)
 
@@ -127,7 +139,7 @@ def income_filter(request):
             incomes_list = (
                 Income.objects
                 .filter(date__range=(d_from, d_to))
-                .annotate(category_name=F("category__name"))
+                .select_related("category")
                 .order_by("-date")
             )
 
